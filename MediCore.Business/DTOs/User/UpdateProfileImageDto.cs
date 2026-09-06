@@ -1,0 +1,14 @@
+﻿using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MediCore.Business.DTOs.User
+{
+    public class UpdateProfileImageDto
+    {
+        public IFormFile Photo { get; set; }
+    }
+}
