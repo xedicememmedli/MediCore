@@ -1,70 +1,83 @@
-# Getting Started with Create React App
+# MediCore - Clinic Management System API
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modular and scalable Web API built with **.NET 8** using **Clean Architecture** and **SOLID** principles. Designed for clinic management, featuring real-time communication, automated background processing, AI integration, and third-party services.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Architecture & Layering
 
-### `npm start`
+The solution follows a strict separation of concerns:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **`MediCore.Core`** — Domain entities (`AppUser`, etc.), Enums, Interfaces, and Core domain abstractions.
+- **`MediCore.Business`** — Business logic, Application services, DTOs, Mappings, and Validations.
+- **`MediCore.DAL`** — Data Access Layer powered by EF Core, Repository pattern, and Migrations.
+- **`MediCore.API`** — REST Controllers, Custom Middlewares, SignalR Hubs, Hangfire Jobs, and Swagger configuration.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## Tech Stack & Integrations
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Framework:** .NET 8 Web API
+- **Database & Persistence:** SQL Server, Entity Framework Core, LINQ
+- **Security & Auth:** ASP.NET Core Identity, JWT Bearer Auth (with WebSocket Query String handling for SignalR)
+- **Real-Time Communication:** ASP.NET Core SignalR (`ChatHub`, `NotificationHub`)
+- **Background Processing:** Hangfire (SQL Server Storage)
+- **AI Integration:** Google Gemini AI API
+- **Document & Media Storage:** Cloudinary API
+- **PDF Generation:** QuestPDF (Community License)
+- **Payment Gateway:** Stripe API
+- **Email Service:** SMTP Mail Integration (`MailSettings`)
+- **Documentation:** Swagger / OpenAPI with JWT Authorization scheme
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Automated Background Jobs (Hangfire)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **`MedicineExpirationJob`:** Daily check for expired medications in stock.
+- **`BasketCleanupJob`:** Daily cleanup of abandoned/expired user baskets.
+- **`ConsultationReminderJob`:** Scheduled daily appointment reminders sent at 08:00 AM.
+- **`WeeklyReportJob`:** Automated weekly financial and system reports generated every Sunday at 23:55.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## Key Features & System Capabilities
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **Role-Based Access Control:** ASP.NET Core Identity with automated DB startup seeding (`RoleSeeder`).
+- **Real-Time Chat & Alerts:** WebSockets-based live chat (`/chathub`) and notification push (`/notificationHub`).
+- **Exception Handling:** Centralized `GlobalExceptionMiddleware` for uniform error responses.
+- **Document & Billing Processing:** Automated PDF invoice creation via QuestPDF, Cloudinary image management, and Stripe online payments.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Getting Started
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Prerequisites
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- SQL Server
 
-## Learn More
+### Configuration
+Configure your credentials in `MediCore.API/appsettings.json`:
+```json
+{
+  "ConnectionStrings": { "Default": "YOUR_SQL_SERVER_CONNECTION_STRING" },
+  "Jwt": {
+    "Issuer": "...",
+    "Audience": "...",
+    "SecurityKey": "..."
+  },
+  "MailSettings": { "Email": "...", "Password": "..." },
+  "CloudinarySettings": { "CloudName": "...", "ApiKey": "...", "ApiSecret": "..." },
+  "Stripe": { "ApiKey": "..." },
+  "GeminiAI": { "ApiKey": "..." }
+}
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Run Application
+1. Apply migrations and seed roles:
+   ```bash
+   dotnet ef database update --project MediCore.DAL --startup-project MediCore.API
+   ```
+2. Start the API:
+   ```bash
+   dotnet run --project MediCore.API
+   ```
